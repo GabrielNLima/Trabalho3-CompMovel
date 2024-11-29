@@ -12,7 +12,7 @@ class GameHelper {
   static final GameHelper _instance = GameHelper.internal();
   factory GameHelper() => _instance;
   GameHelper.internal();
-  Database _db;
+  late Database _db;
 
   Future<Database> get db async{
     if(_db != null){

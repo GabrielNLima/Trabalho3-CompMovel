@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:trab3/helpers/game_helper.dart';
+import 'package:trab3/view/game_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -40,15 +42,15 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void showGamePage({Game contact}) async{
-    final recContact = await Navigator.push(context, MaterialPageRoute(builder: (context) => ContactPage(contact: contact)));
-    if(recContact != null){
-      if(contact != null){
-        await helper.updateContact(recContact);
+  void showGamePage({Game game}) async{
+    final recGame = await Navigator.push(context, MaterialPageRoute(builder: (context) => GamePage(game: game)));
+    if(recGame != null){
+      if(game != null){
+        await helper.updateContact(recGame);
       }else{
-        await helper.saveContact(recContact);
+        await helper.saveContact(recGame);
       }
-      getAllContacts();
+      getAllGames();
     }
   }
 

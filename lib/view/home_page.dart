@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:trab3/helpers/game_helper.dart';
 import 'package:trab3/view/game_page.dart';
+import 'package:trab3/helpers/game_helper.dart';
+import 'package:trab3/view/game_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -119,6 +121,7 @@ class _HomePageState extends State<HomePage> {
       }else{
         await helper.saveGame(recGame);
       }
+      getAllGames();
       getAllGames();
     }
   }

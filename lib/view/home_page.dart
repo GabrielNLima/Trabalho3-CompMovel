@@ -1,8 +1,5 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:trab3/helpers/game_helper.dart';
-import 'package:trab3/view/game_page.dart';
 import 'package:trab3/helpers/game_helper.dart';
 import 'package:trab3/view/game_page.dart';
 
@@ -18,14 +15,14 @@ class _HomePageState extends State<HomePage> {
   List<dynamic> games = [];
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
     getAllGames();
   }
 
-  void getAllGames(){
-    helper.getAllGames().then((list){
-      setState((){
+  void getAllGames() {
+    helper.getAllGames().then((list) {
+      setState(() {
         games = list;
       });
     });
@@ -40,8 +37,8 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
-              'assets/imgs/jogo.png', 
-              fit: BoxFit.contain, 
+              'assets/imgs/jogo.png',
+              fit: BoxFit.contain,
               height: 45,
               width: 45,
             ),
@@ -49,8 +46,7 @@ class _HomePageState extends State<HomePage> {
         ),
         centerTitle: true,
       ),
-      // backgroundColor: const Color.fromARGB(255, 44, 18, 44),
-      backgroundColor: Color.fromARGB(255, 112, 13, 129),
+      backgroundColor: const Color.fromARGB(255, 112, 13, 129),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showGamePage();
@@ -61,44 +57,48 @@ class _HomePageState extends State<HomePage> {
       body: ListView.builder(
         padding: const EdgeInsets.all(10.0),
         itemCount: games.length,
-        itemBuilder: (context, index){
+        itemBuilder: (context, index) {
           return gameCard(context, index);
         },
       ),
     );
   }
 
-  Widget gameCard(BuildContext context, int index){
+  Widget gameCard(BuildContext context, int index) {
     return GestureDetector(
       child: Card(
         child: Padding(
-          padding: EdgeInsets.all(10.0),
+          padding: const EdgeInsets.all(10.0),
           child: Row(
             children: <Widget>[
-              // Container(
-              //   width: 80.0,
-              //   height: 80.0,
-              //   decoration: BoxDecoration(
-              //     shape: BoxShape.circle,
-              //     image: DecorationImage(image: games[index].img != null ? FileImage(File(games[index].img)) : AssetImage("assets/imgs/avatar.png")),
-              //   ),
-              // ),
               Padding(
-                padding: EdgeInsets.only(left: 10.0),
+                padding: const EdgeInsets.only(left: 10.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
                       "${games[index].name}",
-                      style: TextStyle(fontSize: 22.0, fontWeight: FontWeight.bold, color: const Color.fromARGB(255, 112, 13, 129))
+                      style: const TextStyle(
+                        fontSize: 22.0,
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromARGB(255, 112, 13, 129),
+                      ),
                     ),
                     Text(
-                      "Gênero: ${games[index].genre}" ?? "",
-                      style: TextStyle(fontSize: 22.0)
+                      "Gênero: ${games[index].genre}",
+                      style: const TextStyle(fontSize: 18.0),
                     ),
                     Text(
-                      "Horas Jogadas: ${games[index].hours}" ?? "",
-                      style: TextStyle(fontSize: 22.0)
+                      "Horas Jogadas: ${games[index].hours}",
+                      style: const TextStyle(fontSize: 18.0),
+                    ),
+                    Text(
+                      "Rating: ${games[index].rating?.toStringAsFixed(1)}", // Exibe o Rating
+                      style: const TextStyle(fontSize: 18.0),
+                    ),
+                    Text(
+                      "Data de Compra: ${games[index].purchaseDate}",
+                      style: const TextStyle(fontSize: 18.0),
                     ),
                   ],
                 ),
@@ -108,22 +108,90 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       onTap: () {
-        // ShowOptions(context, index);
-      }
+        showOptions(context, index);
+      },
     );
   }
 
-  void showGamePage({Game? game}) async{
-    final recGame = await Navigator.push(context, MaterialPageRoute(builder: (context) => GamePage(game: game)));
-    if(recGame != null){
-      if(game != null){
+  void showGamePage({Game? game}) async {
+    final recGame = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => GamePage(game: game),
+      ),
+    );
+    if (recGame != null) {
+      if (game != null) {
         await helper.updateGame(recGame);
-      }else{
+      } else {
         await helper.saveGame(recGame);
       }
-      getAllGames();
       getAllGames();
     }
   }
 
+  void showOptions(BuildContext context, int index){
+    showModalBottomSheet(context: context,
+    builder: (context){
+      return BottomSheet(
+        onClosing: () {},
+        builder:(context) {
+         return Container(
+          padding: EdgeInsets.all(10.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              TextButton(
+                child: const Text("Editar",
+                style: TextStyle(color: Color.fromARGB(255, 112, 13, 129), fontSize: 20.0 )),
+                onPressed: () {
+                  Navigator.pop(context);
+                  showGamePage(game: games[index]);
+                },
+              ),
+              TextButton(
+                child: const Text("Excluir",
+                style: TextStyle(color: Colors.red, fontSize: 20.0 )),
+                onPressed: () {
+                  requestPop(index);
+                },
+              ),
+            ],
+          ),
+         ); 
+        });
+    });
+  }
+
+  Future<bool> requestPop(int index) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Excluir Jogo?"),
+          content: const Text("Essa ação não pode ser desfeita."),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                helper.deleteGame(games[index]);
+                setState(() {
+                  games.removeAt(index);
+                  Navigator.pop(context);
+                });
+              },
+              child: const Text("Sim"),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text("Cancelar"),
+            ),
+          ],
+        );
+      },
+    );
+    return Future.value(false);
+  }
 }
